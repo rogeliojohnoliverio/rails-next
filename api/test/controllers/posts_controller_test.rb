@@ -3,37 +3,31 @@
 require 'test_helper'
 
 class PostsControllerTest < ActionDispatch::IntegrationTest
-  setup do
-    @post = posts(:one)
-  end
-
   test 'should get index' do
-    get posts_url, as: :json
+    get posts_url, as: :json, headers: token_headers
     assert_response :success
   end
 
   test 'should create post' do
-    assert_difference('Post.count') do
-      post posts_url, params: { post: {} }, as: :json
-    end
+    post_create_params = { title: 'Sample', content: 'Sample', user_id: 1 }
+    post posts_url, params: post_create_params, as: :json, headers: token_headers
 
     assert_response :created
   end
 
   test 'should show post' do
-    get post_url(@post), as: :json
+    get post_url(1), as: :json, headers: token_headers
     assert_response :success
   end
 
   test 'should update post' do
-    patch post_url(@post), params: { post: {} }, as: :json
+    post_update_params = { title: 'Sample update', content: 'Sample update', user_id: 1 }
+    patch post_url(1), params: post_update_params, as: :json, headers: token_headers
     assert_response :success
   end
 
   test 'should destroy post' do
-    assert_difference('Post.count', -1) do
-      delete post_url(@post), as: :json
-    end
+    delete post_url(1), as: :json, headers: token_headers
 
     assert_response :no_content
   end

@@ -3,38 +3,39 @@
 require 'test_helper'
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
-  setup do
-    @session = sessions(:one)
-  end
+  session_create_params = {
+    email: 'rogelio@gmail.com',
+    password: 'password'
+  }
 
   test 'should get index' do
-    get sessions_url, as: :json
+    get sessions_url, as: :json, headers: token_headers
     assert_response :success
   end
 
   test 'should create session' do
-    assert_difference('Session.count') do
-      post sessions_url, params: { session: {} }, as: :json
+    users(:one).update!(password: session_create_params[:password])
+    post sessions_url, params: session_create_params, as: :json
+
+    assert_response :ok
+  end
+
+  test 'email should not be found' do
+    users(:one).update!(password: session_create_params[:password])
+    assert_raise(NoMethodError) do
+      post sessions_url, params: { email: 'test@example.com', password: session_create_params[:password] }, as: :json
     end
-
-    assert_response :created
   end
 
-  test 'should show session' do
-    get session_url(@session), as: :json
-    assert_response :success
-  end
+  test 'invalid password' do
+    users(:one).update!(password: session_create_params[:password])
+    post sessions_url, params: { email: session_create_params[:email], password: 'invalid' }, as: :json
 
-  test 'should update session' do
-    patch session_url(@session), params: { session: {} }, as: :json
-    assert_response :success
+    assert_response :unauthorized
   end
 
   test 'should destroy session' do
-    assert_difference('Session.count', -1) do
-      delete session_url(@session), as: :json
-    end
-
-    assert_response :no_content
+    delete session_url(1), as: :json, headers: token_headers
+    assert_response :ok
   end
 end

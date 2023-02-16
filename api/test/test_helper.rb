@@ -12,4 +12,8 @@ class ActiveSupport::TestCase
   fixtures :all
 
   # Add more helper methods to be used by all tests here...
+  def token_headers(user_id = 1)
+    user = User.find(user_id)
+    { Authorization: "Bearer #{Session.generate!(user).token}" }
+  end
 end
